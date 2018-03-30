@@ -5,6 +5,10 @@ Created on Sat Jan 27 19:22:08 2018
 @author: akshat
 """
 
+import matrix as m
+from math import exp
+from random import shuffle
+
 class neural_layer:
     def __init__(self, inputs, activation, nodes, learning_rate):
         """
@@ -77,8 +81,8 @@ class neural_network:
     def __init__(self, inputs, targets, layers, batch_size, error_listener = True, shuffle_enabled = True):
         """
         Layers should be vectors with the variables: activation, nodes, learning rate
-        inputs is a 2d array of the input data
-        targets is a 2d array of the output data
+        inputs is a 3d array of the input data
+        targets is a 3d array of the output data
         layers is a 2d array containing the parameters for the layers - outlined above
         batch_size is an integer defining the number of datapoints used to calculate the error
         error_listener is a boolean value indicating whether or not the error should be recorded
@@ -93,7 +97,7 @@ class neural_network:
         self.targets = targets
         #Initialise network - forward
         self.layers = []
-        inp = m.matrix([inputs[0]])
+        inp = m.matrix(inputs[0])
         for i in layers:
             act = i[0]
             nodes = i[1]
@@ -103,7 +107,7 @@ class neural_network:
             inp = layer.feed()
         #Initialise network - backward
         out = targets[0]
-        e = self.layers[-1].stochastic_error(m.matrix([out]))
+        e = self.layers[-1].stochastic_error(m.matrix(out))
         for i in self.layers[::-1]:
             i.update(e)
             e = i.backpropagate()
@@ -114,7 +118,7 @@ class neural_network:
         Can be used as a predict function
         x is a list containing 1 row of the input
         """
-        inp = m.matrix([x])
+        inp = m.matrix(x)
         for layer in self.layers:
             layer.pass_inputs(inp)
             inp = layer.feed()
@@ -142,7 +146,7 @@ class neural_network:
             for i in range(self.batch_size):
                inp = x[i]
                output += self.forward_prop(inp)
-               err += final.stochastic_error(m.matrix([y[i]]))
+               err += final.stochastic_error(m.matrix(y[i]))
             #Get error
             ideal = err.apply_function(lambda x: x/self.batch_size).matrix[0][0]
             if self.error_list != None:
