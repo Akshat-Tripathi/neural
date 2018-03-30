@@ -33,26 +33,32 @@ These must be lowercase strings
 pass_inputs(self, inputs)
 ```
 This method used to allow the layer to accept another row of input data.
+
 The layer is initialised with only a single row of data for example: [1, 2, 3], and to pass a new row [4, 5, 6], this method must be used.
+
 inputs: 1 row of the dataset in the form of a matrix data type.
 
 ```Python 
 feed(self)
 ```
 This method processes the input data and returns an output.
+
 Note: the output is already an instance of the matrix data type. 
 
 ```Python 
 stochastic_error(self, ideal)
 ```
 This method returns the difference between the output of the layer and the ideal value. of the output.
+
 ideal: The ideal value of the output of the layer in the form of the matrix data type.
 
 ```Python 
 update(self, error)
 ```
 This method incrementally updates the weight and bias matrices of the layer.
+
 error: The value returned from the stochastic_error method
+
 Returns the matrix used to update the weights and biases
 
 ```Python 
@@ -64,24 +70,33 @@ This method is used to generate the error for the previous layer.
 
 ### Inputs:
 inputs: A 3d array of the input data
+
 targets: A 3d array of the output data
+
 layers: A 2d array containing the parameters for the layers - should be vectors with the variables: [activation, nodes, learning rate]
+
 batch_size: An integer defining the number of datapoints used to calculate the error
+
 error_listener: A boolean value indicating whether or not the error should be recorded
+
 shuffle_enabled: A boolean value indicating whether or not the inputs should be randomly ordered
 
 ```Python 
 forward_prop(self, x)
 ```
 This method propagates the input variable x through the network and returns the prediction of the network.
+
 This method should be used to output the prediction of the network.
+
 x: A single row of the input data in the form of the matrix data type
 
 ```Python 
 train(self, epoch)
 ```
 This method trains the neural network on all of the input data.
+
 epoch: The number of times the network should iterate over the dataset
+
 Returns a list of the error over the epochs if error_listener is enabled
 
 # Usage guide
@@ -117,7 +132,9 @@ error = nn2.backpropagate()
 nn1.update(error)
 ```
 
-Now the network has been initialised, it must be trained. Training involves the forward and backward propagation of the data. These have already been done to initialise the network, and are to be repeated.
+Now the network has been initialised, it must be trained. Training involves the forward and backward propagation of the data. 
+
+These have already been done to initialise the network, and are to be repeated.
 ```Python
 for epoch in range(100):
     inp = x[i%4]
