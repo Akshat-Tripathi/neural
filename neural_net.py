@@ -59,7 +59,7 @@ class neural_layer:
         """
         Returns the difference between the predicted output and the real output
         """
-        return ideal - self.output
+        return (ideal - self.output)
     
     def update(self, error):
         """
@@ -78,20 +78,18 @@ class neural_layer:
         return self.back
 
 class neural_network:
-    def __init__(self, inputs, targets, layers, batch_size, error_listener = True, shuffle_enabled = True):
+    def __init__(self, inputs, targets, layers, error_listener = True, shuffle_enabled = True):
         """
         Layers should be vectors with the variables: activation, nodes, learning rate
         inputs is a 3d array of the input data
         targets is a 3d array of the output data
         layers is a 2d array containing the parameters for the layers - outlined above
-        batch_size is an integer defining the number of datapoints used to calculate the error
         error_listener is a boolean value indicating whether or not the error should be recorded
         shuffle_enabled is a boolean value indicating whether or not the inputs should be randomly ordered
         """
         
         if error_listener:
             self.error_list = []
-        self.batch_size = batch_size
         self.inputs = inputs
         self.shuffle = shuffle_enabled
         self.targets = targets
@@ -124,14 +122,16 @@ class neural_network:
             inp = layer.feed()
         return inp #At this point, inp is the output
     
-    def train(self, epochs):
+    def train(self, epochs, batch_size):
         """
         Returns the error list if error_listener is True
+        batch_size is an integer defining the number of datapoints used to calculate the error
         Is responsible for training the neural network
         epochs is the number of iterations that the network should train for
         """
         x = self.inputs
         y = self.targets
+        self.batch_size = batch_size
         for epoch in range(epochs):
             if self.shuffle:
                 c = list(zip(x, y))
@@ -148,9 +148,9 @@ class neural_network:
                output += self.forward_prop(inp)
                err += final.stochastic_error(m.matrix(y[i]))
             #Get error
-            ideal = err.apply_function(lambda x: x/self.batch_size).matrix[0][0]
+            ideal = err.apply_function(lambda x: x/self.batch_size)
             if self.error_list != None:
-                self.error_list.append(ideal)
+                self.error_list.append(ideal.matrix[0][0])
             
             #Update weights
             for layer in self.layers[::-1]:
