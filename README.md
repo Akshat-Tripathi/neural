@@ -75,8 +75,6 @@ targets: A 3d array of the output data
 
 layers: A 2d array containing the parameters for the layers - should be vectors with the variables: [activation, nodes, learning rate]
 
-batch_size: An integer defining the number of datapoints used to calculate the error
-
 error_listener: A boolean value indicating whether or not the error should be recorded
 
 shuffle_enabled: A boolean value indicating whether or not the inputs should be randomly ordered
@@ -91,9 +89,11 @@ This method should be used to output the prediction of the network.
 x: A single row of the input data in the form of the matrix data type
 
 ```Python 
-train(self, epoch)
+train(self, epoch, batch_size)
 ```
 This method trains the neural network on all of the input data.
+
+batch_size: An integer defining the number of datapoints used to calculate the error
 
 epoch: The number of times the network should iterate over the dataset
 
@@ -172,7 +172,7 @@ The network above has the same shape as the previous network.
 
 Now we create the neural_network and train it.
 ``` Python
-nn = neural_network(x, y, layers, 3, error_listener=True)
-error = nn.train(1000)
+nn = neural_network(x, y, layers, error_listener=True)
+error = nn.train(1000, 3)
 ```
 The error variable in this case is a list of the error per epoch the network was trained.
