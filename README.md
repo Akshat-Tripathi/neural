@@ -8,7 +8,7 @@ This module only requires matrix, which can be found [here](https://github.com/A
 # Installation:
 Clone this repository with the following command.
 
-``` git clone https://github.com/Akshat-Tripathi/neural-net.git ```
+``` https://github.com/Akshat-Tripathi/neural.git```
 
 # Learning algorithms:
 Currently neural networks can be made using:
