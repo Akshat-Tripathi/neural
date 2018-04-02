@@ -1,6 +1,6 @@
 # Neural Network
 
-This is a template of a fully customisable neural network, written fully in Python. It allows anyone with limited knowledge of machine learning to easily create a working neural network. While allowing those with a more sound knowledge of the field to create more complex networks.
+This is a template of a fully customisable neural network, written in Python. It allows anyone with limited knowledge of machine learning to easily create a working neural network, while allowing those with a more sound knowledge of the field to create more complex networks.
 
 # Requirements:
 This module only requires matrix, which can be found [here](https://github.com/Akshat-Tripathi/matrix-lib)
@@ -48,7 +48,7 @@ Note: the output is already an instance of the matrix data type.
 ```Python 
 stochastic_error(self, ideal)
 ```
-This method returns the difference between the output of the layer and the ideal value. of the output.
+This method returns the difference between the output of the layer and the ideal value of the output.
 
 ideal: The ideal value of the output of the layer in the form of the matrix data type.
 
