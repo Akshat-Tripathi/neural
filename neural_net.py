@@ -10,7 +10,7 @@ from math import exp
 from random import shuffle
 
 class neural_layer:
-    def __init__(self, inputs, activation, nodes, learning_rate):
+    def __init__(self, inputs, activation, nodes, learning_rate, error_function):
         """
         Initialises a neural layer
         inputs is a row of the input data
@@ -21,18 +21,24 @@ class neural_layer:
         self.inputs = inputs
         #The learning rate of the layer
         self.lr = learning_rate
-        #Initialises a matrix with random numbers of shape (number of neurons) by (number of input columns)
-        self.weights = m.random_matrix([nodes, inputs.shape[0]])
+        #Initialises a matrix with random numbers with a mean of 0 of shape (number of neurons) by (number of input columns)
+        self.weights = m.seed_matrix([nodes, inputs.shape[0]], (1/(inputs.shape[0]**0.5)))
         #Initialises a matrix with random numbers of shape (number of neurons) by (1)
         self.bias = m.random_matrix([nodes, 1])
         #Dictionary containing current activation functions
         activations = {"relu": lambda x : max(0, x),
                        "linear" : lambda x : x,
-                       "sigmoid" : lambda x : 1/(1+exp(-x))}
+                       "sigmoid" : lambda x : 1/(1+exp(-x)),
+                       "leaky relu" : lambda x: max(0.2*x, x)}
         #Dictionary containing current activation functions' derivatives
         derivs = {"relu": lambda x : 1 if x>0 else 0,
                   "linear" : lambda x : 1,
-                  "sigmoid" : lambda x : x*(1-x)}
+                  "sigmoid" : lambda x : x*(1-x),
+                  "leaky relu" : lambda x : 1 if x>0 else 0.2}
+
+        error_functions = {"discrete": self.discrete_error,
+                           "stochastic": self.stochastic_error}
+        self.error_function = error_functions[error_function]
         #Decides the activation function based off the input from the user
         self.act = activations[activation]
         self.deriv = derivs[activation]
@@ -40,27 +46,34 @@ class neural_layer:
         self.output = None
         self.error = None
         self.delta = None
-    
+
     def pass_inputs(self, inputs):
         """
         A neural layer must use this function to handle multiple rows of input data
         inputs is a row of the input data
         """
         self.inputs = inputs
-        
+
     def feed(self):
         """
         Returns output for the layer, processes the data
         """
         self.output = (self.weights.dot_product(self.inputs) + self.bias).apply_function(self.act)
         return self.output
-    
+
     def stochastic_error(self, ideal):
         """
         Returns the difference between the predicted output and the real output
         """
-        return (ideal - self.output)
-    
+        return (ideal - self.output).apply_function(abs)
+
+    def discrete_error(self, ideal):
+        """If successful then 0 else 1"""
+        if ideal == self.output:
+            return 0
+        else:
+            return 1
+
     def update(self, error):
         """
         Used to incrementally update the layer's weights and biases to allow it to perform better
@@ -71,14 +84,14 @@ class neural_layer:
         self.weights += self.delta.dot_product(self.inputs.Transpose())
         self.bias += self.delta
         return self.delta
-    
+
     def backpropagate(self):
         """Used to pass error backwards through a network"""
         self.back = self.weights.Transpose().dot_product(self.delta)
         return self.back
 
 class neural_network:
-    def __init__(self, inputs, targets, layers, error_listener = True, shuffle_enabled = True):
+    def __init__(self, inputs, targets, layers, error_listener = True, shuffle_enabled = True, error_function = "stochastic"):
         """
         Layers should be vectors with the variables: activation, nodes, learning rate
         inputs is a 3d array of the input data
@@ -87,7 +100,8 @@ class neural_network:
         error_listener is a boolean value indicating whether or not the error should be recorded
         shuffle_enabled is a boolean value indicating whether or not the inputs should be randomly ordered
         """
-        
+
+        self.error_function = error_function
         if error_listener:
             self.error_list = []
         self.inputs = inputs
@@ -100,16 +114,16 @@ class neural_network:
             act = i[0]
             nodes = i[1]
             lr = i[2]
-            layer = neural_layer(inp, act, nodes, lr)
+            layer = neural_layer(inp, act, nodes, lr, self.error_function)
             self.layers.append(layer)
             inp = layer.feed()
         #Initialise network - backward
         out = targets[0]
-        e = self.layers[-1].stochastic_error(m.matrix(out))
+        e = self.layers[-1].error_function(m.matrix(out))
         for i in self.layers[::-1]:
             i.update(e)
             e = i.backpropagate()
-    
+
     def forward_prop(self, x):
         """
         Returns an output based off the input (x) supplied to it
@@ -121,7 +135,7 @@ class neural_network:
             layer.pass_inputs(inp)
             inp = layer.feed()
         return inp #At this point, inp is the output
-    
+
     def train(self, epochs, batch_size):
         """
         Returns the error list if error_listener is True
@@ -146,17 +160,21 @@ class neural_network:
             for i in range(self.batch_size):
                inp = x[i]
                output += self.forward_prop(inp)
-               err += final.stochastic_error(m.matrix(y[i]))
+               err += final.error_function(m.matrix(y[i]))
             #Get error
             ideal = err.apply_function(lambda x: x/self.batch_size)
             if self.error_list != None:
                 self.error_list.append(ideal.matrix[0][0])
-            
+                if min(self.error_list) == ideal.matrix[0][0]:
+                    self.best = []
+                    for i in self.inputs:
+                        self.best.append(self.forward_prop(i).matrix[0][0])
+
             #Update weights
             for layer in self.layers[::-1]:
                 layer.update(ideal)
                 ideal = layer.backpropagate()
         try:
             return self.error_list
-        except NameError: 
+        except NameError:
             pass
