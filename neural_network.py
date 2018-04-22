@@ -5,7 +5,7 @@ Created on Sun Apr 22 16:36:26 2018
 @author: akshat
 """
 
-import neural_layer
+from neural_net.neural_layer import neural_layer
 from random import shuffle
 import numpy as np
 
@@ -23,6 +23,8 @@ class neural_network:
         self.error_function = error_function
         if error_listener:
             self.error_list = []
+        else:
+            self.error_list = None
         self.inputs = inputs
         self.shuffle = shuffle_enabled
         self.targets = targets
@@ -86,10 +88,6 @@ class neural_network:
             ideal = f(err)
             if self.error_list != None:
                 self.error_list.append(ideal[0][0])
-            if min(self.error_list) == ideal[0][0]:
-                self.best = []
-                for i in self.inputs:
-                    self.best.append(self.forward_prop(i)[0][0])
 
             #Update weights
             for layer in self.layers[::-1]:
